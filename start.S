@@ -35,7 +35,11 @@ not_used:
 	nop
 
 irq:
-	nop
+	@保存环境
+	sub lr, lr, #4
+	stmfd sp!, {r0-r12,lr}
+	bl handle_int
+	ldmfd sp!, {r0-r12,pc}^ 
 
 fiq:	
 	nop
@@ -136,7 +140,10 @@ copy_loop:
 	mov pc, lr
 
 init_stack:
-	ldr sp, =0x34000000
+	msr cpsr_c, #0xd2
+	ldr sp, =0x33000000 //初始化irq 栈
+	msr cpsr_c, #0xd3	
+	ldr sp, =0x34000000 //初始化 svc 栈
 	mov pc, lr
 
 clean_bss:
